@@ -1,6 +1,7 @@
 package ir.ac.aut.ceit.cn.Logic;
 
 import ir.ac.aut.ceit.cn.Message.*;
+import ir.ac.aut.ceit.cn.Model.FileUtils;
 
 import java.io.*;
 import java.net.*;
@@ -13,12 +14,13 @@ public class Server extends NetworkPeer implements Runnable {
     private InetAddress clientPeerIP;
     private int clientPeerPort;
 
-    public String testFile = "test123";
+    public byte[] dataToSend;
 
 
-    public Server(String fileName, long fileSize) {
+    public Server(String fileName,String filePath) {
         this.fileName = fileName;
-        this.fileSize = fileSize;
+        dataToSend = FileUtils.readFile(filePath);
+        this.fileSize = dataToSend.length;
 
         try {
             datagramSocket = new DatagramSocket(PORT, InetAddress.getByName("0.0.0.0"));
@@ -40,9 +42,9 @@ public class Server extends NetworkPeer implements Runnable {
                     int start = chunkIndex * FileMessage.MAX_PACKET_SIZE;
                     byte[] chunk = new byte[Math.min((int)(fileSize-start),FileMessage.MAX_PACKET_SIZE)];
                     for (int i = 0; i < chunk.length; i++) {
-                        chunk[i] = testFile.getBytes()[start + i];
+                        chunk[i] = dataToSend[start + i];
                     }
-                    printLog("I sent file chunk [" + String.valueOf(start) + ":" + String.valueOf(chunk.length - 1 + start) + "]");
+                    printLog("I sent a file chunk [" + String.valueOf(start) + ":" + String.valueOf(chunk.length - 1 + start) + "]");
                     uploadFile(chunkIndex,chunk);
                 }
             }
@@ -54,6 +56,7 @@ public class Server extends NetworkPeer implements Runnable {
         try {
             data = getFileMessageBytes(offset,chunk);
             DatagramPacket filePacket = new DatagramPacket(data, data.length, clientPeerIP, clientPeerPort);
+            //System.out.println("size---->" + String.valueOf(filePacket.getData().length));
             datagramSocket.send(filePacket);
         } catch (IOException e) {
             e.printStackTrace();
@@ -171,6 +174,6 @@ public class Server extends NetworkPeer implements Runnable {
 
 
     public static void main(String[] args) {
-        new Server("test", 123).waitToBeDiscovered();
+        new Server("test", "//").waitToBeDiscovered();
     }
 }

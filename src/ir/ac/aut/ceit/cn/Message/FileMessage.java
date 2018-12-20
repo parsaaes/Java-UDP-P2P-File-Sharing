@@ -3,7 +3,7 @@ package ir.ac.aut.ceit.cn.Message;
 import java.io.Serializable;
 
 public class FileMessage extends Message implements Serializable {
-    public static int MAX_PACKET_SIZE = 10;
+    public static int MAX_PACKET_SIZE = 10000;
     private static String firstLine = "File response:";
     private int offset;
     private byte[] data;
@@ -14,7 +14,7 @@ public class FileMessage extends Message implements Serializable {
     }
 
     public static int getMaximumSize() {
-        return 10000 - (firstLine.length() + 4);
+        return 10000 + (firstLine.length() + 4 + 4);
     }
 
     public int getOffset() {

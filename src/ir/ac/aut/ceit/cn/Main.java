@@ -2,6 +2,7 @@ package ir.ac.aut.ceit.cn;
 
 import ir.ac.aut.ceit.cn.Logic.Client;
 import ir.ac.aut.ceit.cn.Logic.Server;
+import ir.ac.aut.ceit.cn.Model.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,19 +12,9 @@ import java.nio.file.Path;
 public class Main {
 
     public static void main(String[] args) {
-         String testFile = "test123";
-
-        File file = new File("sender/test.png");
-        try {
-            byte[] data = Files.readAllBytes(file.toPath());
-            System.out.println(data.length);
-            Files.write(new File("receiver/res2.png").toPath(),data);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Thread server = new Thread(new Server("test",testFile.getBytes().length));
-        Thread client = new Thread(new Client("test"));
+        //FileUtils.writeFile(FileUtils.readFile("sender/test.png"),"receiver/ok.png");
+        Thread server = new Thread(new Server("poker-face","sender/test.png"));
+        Thread client = new Thread(new Client("poker-face"));
 
         server.start();
         client.start();

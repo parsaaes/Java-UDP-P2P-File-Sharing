@@ -1,9 +1,12 @@
 package ir.ac.aut.ceit.cn.Logic;
 
 import ir.ac.aut.ceit.cn.Message.*;
+import ir.ac.aut.ceit.cn.Model.FileUtils;
 
 import java.io.*;
+import java.lang.instrument.Instrumentation;
 import java.net.*;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
@@ -38,14 +41,14 @@ public class Client extends NetworkPeer implements Runnable {
 
     private void downloadFile() {
         int numberOfChunks = FileMessage.getChunkSize(fileSize);
-        System.out.println(String.valueOf(numberOfChunks));
         boolean[] chunksReceived = new boolean[numberOfChunks];
         for (int i = 0; i < chunksReceived.length; i++) {
             chunksReceived[i] = false;
         }
         byte[][] chunks = new byte[numberOfChunks][];
         while (downloadIsNotComplete(chunksReceived)) {
-            byte[] data = new byte[10000];
+            System.out.println("i am in");
+            byte[] data = new byte[FileMessage.MAX_PACKET_SIZE + 2000];
             DatagramPacket datagramPacket = new DatagramPacket(data, data.length);
             try {
                 datagramSocket.setSoTimeout(0);
@@ -65,9 +68,16 @@ public class Client extends NetworkPeer implements Runnable {
                 e.printStackTrace();
             }
         }
+        System.out.println("i am out");
+        int totalSize = 0;
         for (byte[] chunk : chunks) {
-            printLog(new String(chunk));
+            totalSize += chunk.length;
         }
+        ByteBuffer byteBuffer = ByteBuffer.allocate(totalSize);
+        for (byte[] chunk : chunks) {
+            byteBuffer.put(chunk);
+        }
+        FileUtils.writeFile(byteBuffer.array(),"receiver/aaw123.png");
         printLog("Complete");
     }
 
