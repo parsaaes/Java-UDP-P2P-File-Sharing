@@ -1,4 +1,4 @@
-package ir.ac.aut.ceit.cn;
+package ir.ac.aut.ceit.cn.Logic;
 
 import java.io.IOException;
 import java.net.*;
