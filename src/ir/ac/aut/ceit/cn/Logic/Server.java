@@ -23,7 +23,8 @@ public class Server extends NetworkPeer implements Runnable {
         this.fileSize = dataToSend.length;
 
         try {
-            datagramSocket = new DatagramSocket(PORT, InetAddress.getByName("0.0.0.0"));
+//            datagramSocket = new DatagramSocket(PORT, InetAddress.getByName("0.0.0.0"));
+            datagramSocket = new DatagramSocket(PORT, InetAddress.getByName("127.0.0.1"));
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (UnknownHostException e) {
@@ -173,7 +174,4 @@ public class Server extends NetworkPeer implements Runnable {
     }
 
 
-    public static void main(String[] args) {
-        new Server("test", "//").waitToBeDiscovered();
-    }
 }

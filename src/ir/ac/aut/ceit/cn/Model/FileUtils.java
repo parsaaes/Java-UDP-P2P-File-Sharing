@@ -5,6 +5,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 public class FileUtils {
+
+    public static boolean fileExist(String path) {
+        File f = new File(path);
+        if(f.exists() && !f.isDirectory()) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     public static byte[] readFile(String path) {
         File file = new File(path);
         byte[] data = null;

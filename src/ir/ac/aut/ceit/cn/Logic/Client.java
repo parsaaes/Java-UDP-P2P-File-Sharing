@@ -21,8 +21,8 @@ public class Client extends NetworkPeer implements Runnable {
         this.fileName = fileName;
         try {
             datagramSocket = new DatagramSocket();
-            datagramSocket.setSendBufferSize(30000);
-            datagramSocket.setReceiveBufferSize(30000);
+            datagramSocket.setSendBufferSize(100000);
+            datagramSocket.setReceiveBufferSize(100000);
             datagramSocket.setBroadcast(true);
         } catch (SocketException e) {
             e.printStackTrace();
@@ -47,7 +47,6 @@ public class Client extends NetworkPeer implements Runnable {
         }
         byte[][] chunks = new byte[numberOfChunks][];
         while (downloadIsNotComplete(chunksReceived)) {
-            System.out.println("i am in");
             byte[] data = new byte[FileMessage.MAX_PACKET_SIZE + 2000];
             DatagramPacket datagramPacket = new DatagramPacket(data, data.length);
             try {
@@ -77,7 +76,7 @@ public class Client extends NetworkPeer implements Runnable {
         for (byte[] chunk : chunks) {
             byteBuffer.put(chunk);
         }
-        FileUtils.writeFile(byteBuffer.array(),"receiver/aaw123.png");
+        FileUtils.writeFile(byteBuffer.array(),"receiver/" + fileName);
         printLog("Complete");
     }
 
@@ -138,7 +137,7 @@ public class Client extends NetworkPeer implements Runnable {
                 objectInputStream.close();
                 if (isIHaveMessage(message)) {
                     IHaveMessage iHaveMessage = (IHaveMessage) message;
-                    printLog(iHaveMessage.toString());
+                    printLog("received " + iHaveMessage.toString());
                     fileSize = iHaveMessage.getFileSize();
                     serverPeerIP = responsePacket.getAddress();
                     serverPeerPort = responsePacket.getPort();
@@ -182,6 +181,11 @@ public class Client extends NetworkPeer implements Runnable {
     public ArrayList<InetAddress> getAllBroadcastAddresses() {
         ArrayList<InetAddress> result = new ArrayList<>();
         try {
+            result.add(InetAddress.getByName("127.0.0.1"));
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        try {
            Enumeration interfaces =  NetworkInterface.getNetworkInterfaces();
            while (interfaces.hasMoreElements()) {
                NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
@@ -197,7 +201,7 @@ public class Client extends NetworkPeer implements Runnable {
             e.printStackTrace();
         }
         for (InetAddress inetAddress : result) {
-            printLog(inetAddress.toString());
+            printLog("I found a broadcast address " + inetAddress.toString());
         }
         return result;
     }
@@ -208,9 +212,6 @@ public class Client extends NetworkPeer implements Runnable {
         System.out.println("[Client:] " + text);
     }
 
-    public static void main(String[] args) {
-        new Client(":P:P:P").run();
-    }
 
     public byte[] getRequestBytes() throws IOException {
         byte[] data;
