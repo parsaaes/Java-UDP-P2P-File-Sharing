@@ -14,6 +14,7 @@ public class Server extends NetworkPeer implements Runnable {
     private DatagramSocket datagramSocket;
     private InetAddress clientPeerIP;
     private int clientPeerPort;
+    private boolean mustRespond = true;
 
     public byte[] dataToSend;
 
@@ -29,7 +30,8 @@ public class Server extends NetworkPeer implements Runnable {
 //            datagramSocket = new DatagramSocket(PORT,InetAddress.getLocalHost());
             datagramSocket = new DatagramSocket(PORT);
         } catch (SocketException e) {
-            e.printStackTrace();
+            printLog("Can't start a new server. => " + e.getMessage().toString());
+            mustRespond = false;
         }
     }
 
@@ -39,7 +41,7 @@ public class Server extends NetworkPeer implements Runnable {
     }
 
     public void run() {
-        while (true) {
+        while (mustRespond) {
             boolean sendFile = false;
             updateDataBytes();
             waitToBeDiscovered();
