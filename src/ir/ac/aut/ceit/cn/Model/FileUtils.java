@@ -7,15 +7,12 @@ import java.nio.file.Files;
 public class FileUtils {
 
     public static boolean fileExist(String path) {
-        File file = new File(path);
-        try {
-            if(!file.exists()) {
-                file.getParentFile().mkdirs();
-                file.createNewFile();
-            }
-            Files.write(file.toPath(), data);
-        } catch (IOException e) {
-            e.printStackTrace();
+        File f = new File(path);
+        if(f.exists() && !f.isDirectory()) {
+            return true;
+        }
+        else {
+            return false;
         }
     }
 
@@ -25,16 +22,26 @@ public class FileUtils {
         try {
             data = Files.readAllBytes(file.toPath());
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error in reading file. maybe it's not exist.");
         }
         return data;
     }
 
     public static void writeFile(byte[] data, String path) {
+        File file = new File(path);
         try {
-            Files.write(new File(path).toPath(), data);
+            if(!file.exists()) {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            }
+            else {
+                // following lines seems unnecessary
+                file.delete();
+                file.createNewFile();
+            }
+            Files.write(file.toPath(), data);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error in writing to file.");
         }
     }
 }

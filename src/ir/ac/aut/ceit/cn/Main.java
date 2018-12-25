@@ -15,12 +15,11 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
-
         Scanner sc = new Scanner(System.in);
-        String rawText = sc.nextLine();
-        processRequest(rawText);
-        rawText = sc.nextLine();
-        processRequest(rawText);
+        while (true) {
+            String rawText = sc.nextLine();
+            processRequest(rawText);
+        }
 
     }
 
@@ -34,7 +33,7 @@ public class Main {
                 System.out.println("I am serving " + arguments.get(0));
             }
             else {
-                System.out.println("File doesn't exist! please restart the program.");
+                System.out.println("File doesn't exist! please restart the program with a valid file.");
                 System.exit(-1);
             }
         }

@@ -8,6 +8,7 @@ import java.net.*;
 
 public class Server extends NetworkPeer implements Runnable {
     public final static int PORT = 12345;
+    private String filePath;
     private String fileName;
     private long fileSize;
     private DatagramSocket datagramSocket;
@@ -19,22 +20,28 @@ public class Server extends NetworkPeer implements Runnable {
 
     public Server(String fileName,String filePath) {
         this.fileName = fileName;
-        dataToSend = FileUtils.readFile(filePath);
-        this.fileSize = dataToSend.length;
+        this.filePath = filePath;
+        updateDataBytes();
+
 
         try {
 //            datagramSocket = new DatagramSocket(PORT, InetAddress.getByName("0.0.0.0"));
-            datagramSocket = new DatagramSocket(PORT, InetAddress.getByName("127.0.0.1"));
+//            datagramSocket = new DatagramSocket(PORT,InetAddress.getLocalHost());
+            datagramSocket = new DatagramSocket(PORT);
         } catch (SocketException e) {
             e.printStackTrace();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
         }
+    }
+
+    private void updateDataBytes() {
+        dataToSend = FileUtils.readFile(filePath);
+        this.fileSize = dataToSend.length;
     }
 
     public void run() {
         while (true) {
             boolean sendFile = false;
+            updateDataBytes();
             waitToBeDiscovered();
             sendFile = waitForDownloadRequest();
             if (sendFile == true) {
@@ -48,6 +55,7 @@ public class Server extends NetworkPeer implements Runnable {
                     printLog("I sent a file chunk [" + String.valueOf(start) + ":" + String.valueOf(chunk.length - 1 + start) + "]");
                     uploadFile(chunkIndex,chunk);
                 }
+                printLog("File sent completely. I'm going to listen for future requests.");
             }
         }
     }
@@ -129,7 +137,7 @@ public class Server extends NetworkPeer implements Runnable {
         objectInputStream.close();
         if (isDiscoveryMessage(message)) {
             DiscoveryMessage discoveryMessage = (DiscoveryMessage) message;
-            printLog(datagramPacket.getAddress().toString() + ":" + String.valueOf(datagramPacket.getPort()) + " wants " + discoveryMessage.getFileName());
+            printLog("I am " + datagramSocket.getLocalAddress().toString() + " and " + datagramPacket.getAddress().toString() + ":" + String.valueOf(datagramPacket.getPort()) + " wants " + discoveryMessage.getFileName());
             if (discoveryMessage.getFileName().equals(fileName)) {
                 sendIHaveMessage(datagramSocket, datagramPacket.getPort(), datagramPacket.getAddress());
                 return false;

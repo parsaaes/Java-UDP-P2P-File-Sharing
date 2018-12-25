@@ -67,7 +67,7 @@ public class Client extends NetworkPeer implements Runnable {
                 e.printStackTrace();
             }
         }
-        System.out.println("i am out");
+        //System.out.println("i am out");
         int totalSize = 0;
         for (byte[] chunk : chunks) {
             totalSize += chunk.length;
@@ -119,7 +119,7 @@ public class Client extends NetworkPeer implements Runnable {
                 printLog("File name is just too big!!");
             }
         } catch (SocketException e) {
-            e.printStackTrace();
+            printLog("a network in list is unreachable. sending discovery to this network failed.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -182,6 +182,7 @@ public class Client extends NetworkPeer implements Runnable {
         ArrayList<InetAddress> result = new ArrayList<>();
         try {
             result.add(InetAddress.getByName("127.0.0.1"));
+            result.add(InetAddress.getLocalHost());
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
@@ -200,8 +201,14 @@ public class Client extends NetworkPeer implements Runnable {
         } catch (SocketException e) {
             e.printStackTrace();
         }
-        for (InetAddress inetAddress : result) {
-            printLog("I found a broadcast address " + inetAddress.toString());
+        for (int i = 0; i < result.size(); i++) {
+            InetAddress inetAddress = result.get(i);
+            if(i < 2) {
+                printLog("I loopback/localhost address " + inetAddress.toString());
+            }
+            else {
+                printLog("I found a broadcast address " + inetAddress.toString());
+            }
         }
         return result;
     }
