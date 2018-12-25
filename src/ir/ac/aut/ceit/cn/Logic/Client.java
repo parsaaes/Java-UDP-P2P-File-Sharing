@@ -76,7 +76,7 @@ public class Client extends NetworkPeer implements Runnable {
         for (byte[] chunk : chunks) {
             byteBuffer.put(chunk);
         }
-        FileUtils.writeFile(byteBuffer.array(),"receiver/" + fileName);
+        FileUtils.writeFile(byteBuffer.array(),System.getProperty("user.dir").toString() + "/receiver/" + fileName);
         printLog("Complete");
     }
 
