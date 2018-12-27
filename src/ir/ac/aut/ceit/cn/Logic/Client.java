@@ -14,20 +14,19 @@ public class Client extends NetworkPeer implements Runnable {
     private String fileName;
     private long fileSize;
     private DatagramSocket datagramSocket;
-    private ArrayList<DatagramSocket> datagramSocketArrayList;
     private InetAddress serverPeerIP;
     private int serverPeerPort;
 
     public Client(String fileName) {
         this.fileName = fileName;
-            datagramSocketArrayList = new ArrayList<>();
-            //setUpDatagramSocket(datagramSocket);
-    }
-
-    private void setUpDatagramSocket(DatagramSocket ds) throws SocketException {
-        ds.setSendBufferSize(100000);
-        ds.setReceiveBufferSize(100000);
-        ds.setBroadcast(true);
+        try {
+            datagramSocket = new DatagramSocket();
+            datagramSocket.setSendBufferSize(100000);
+            datagramSocket.setReceiveBufferSize(100000);
+            datagramSocket.setBroadcast(true);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
     }
 
     public void run() {
@@ -113,10 +112,7 @@ public class Client extends NetworkPeer implements Runnable {
                 ArrayList<InetAddress> interfaces = getAllBroadcastAddresses();
                 for (InetAddress anInterface : interfaces) {
                     DatagramPacket datagramPacket = new DatagramPacket(data, data.length, anInterface, 12345);
-                    DatagramSocket ds = new DatagramSocket();
-                    setUpDatagramSocket(ds);
-                    datagramSocketArrayList.add(ds);
-                    ds.send(datagramPacket);
+                    datagramSocket.send(datagramPacket);
                 }
             }
             else {
@@ -130,31 +126,15 @@ public class Client extends NetworkPeer implements Runnable {
     }
 
     private boolean waitForAnswer() {
-        Message message = null;
         try {
             while (true) {
                 byte[] answer = new byte[10000];
                 DatagramPacket responsePacket = new DatagramPacket(answer, answer.length);
-                for (DatagramSocket socket : datagramSocketArrayList) {
-                    socket.setSoTimeout(5000);
-                    try {
-                        socket.receive(responsePacket);
-                    }
-                    catch (IOException e) {
-                        printLog("waiting for answer timed out. waiting for other peers.");
-                        continue;
-                    }
-                    ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(responsePacket.getData()));
-                    message = (Message) objectInputStream.readObject();
-                    objectInputStream.close();
-                    if(isIHaveMessage(message)) {
-                        datagramSocket = socket;
-                        break;
-                    }
-                }
-//                datagramSocket.setSoTimeout(5000);
-//                datagramSocket.receive(responsePacket);
-
+                datagramSocket.setSoTimeout(5000);
+                datagramSocket.receive(responsePacket);
+                ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(responsePacket.getData()));
+                Message message = (Message) objectInputStream.readObject();
+                objectInputStream.close();
                 if (isIHaveMessage(message)) {
                     IHaveMessage iHaveMessage = (IHaveMessage) message;
                     printLog("received " + iHaveMessage.toString());
@@ -172,7 +152,7 @@ public class Client extends NetworkPeer implements Runnable {
             return false;
         }
         catch (IOException e) {
-            printLog("waiting for answer timed out.");
+            e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
